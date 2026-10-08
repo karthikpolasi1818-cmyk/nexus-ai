@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Any
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
 from app.api.schemas import (
@@ -491,8 +491,10 @@ def validate_dataset(
 @router.post(
     "/analyze"
 )
-def analyze_dataset(
-    request: DatasetRequest,
+async def analyze_dataset(
+    files: list[UploadFile] | None = File(default=None),
+    file: UploadFile | None = File(default=None),
+    target: str | None = Form(default=None),
 ) -> dict[str, Any]:
     """
     Execute the complete NEXUS AI intelligence pipeline.
@@ -527,6 +529,59 @@ def analyze_dataset(
       ↓
     Executive Recommendations
     """
+
+    # ----------------------------------------------------
+    # MULTIPART FILE -> EXISTING DATASET REQUEST ADAPTER
+    # ----------------------------------------------------
+
+    uploads: list[UploadFile] = list(files or [])
+
+    if file is not None:
+        uploads.append(file)
+
+    if not uploads:
+        raise HTTPException(
+            status_code=400,
+            detail="No dataset file uploaded. Use multipart field 'files'.",
+        )
+
+    if len(uploads) > 1:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The current /api/analyze endpoint accepts one dataset "
+                "per request. Please select one CSV file."
+            ),
+        )
+
+    uploaded = uploads[0]
+
+    content = await uploaded.read()
+
+    if not content:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded dataset is empty.",
+        )
+
+    filename = uploaded.filename or "dataset.csv"
+
+    if not filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=415,
+            detail="The current /api/analyze endpoint accepts CSV files.",
+        )
+
+    try:
+        csv_data = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        csv_data = content.decode("latin-1")
+
+    request = DatasetRequest(
+        csv_data=csv_data,
+        target=target,
+        filename=filename,
+    )
 
     start_time = time.perf_counter()
 
