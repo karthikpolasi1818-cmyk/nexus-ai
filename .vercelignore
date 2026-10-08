@@ -1,0 +1,12 @@
+.venv/
+**/.venv/
+
+frontend/
+nexus-ai-source.zip
+*.zip
+*.pdb
+
+**/build/
+**/.dart_tool/
+__pycache__/
+.pytest_cache/
