@@ -1,5 +1,4 @@
-@"
-.venv/
+﻿.venv/
 __pycache__/
 *.py[cod]
 *.pyo
@@ -12,6 +11,7 @@ __pycache__/
 .streamlit/secrets.toml
 
 .git/
+.vercel/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -35,4 +35,9 @@ build/
 
 data/
 reports/
-"@ | Set-Content .gitignore
+
+# Keep Flutter Web production build for Vercel
+!frontend/
+!frontend/build/
+!frontend/build/web/
+!frontend/build/web/**

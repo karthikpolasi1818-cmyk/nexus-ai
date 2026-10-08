@@ -1,6 +1,19 @@
-{
+﻿{
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": null,
+      "buildCommand": "echo Using prebuilt Flutter Web",
+      "installCommand": "echo No frontend dependencies",
+      "outputDirectory": "build/web",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
+    },
     "backend": {
       "root": ".",
       "framework": "fastapi",
@@ -9,9 +22,15 @@
   },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
       "destination": {
         "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
       }
     }
   ]
