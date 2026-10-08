@@ -626,7 +626,11 @@ class _NexusHomePageState extends State<NexusHomePage> {
   }
 
   String money(dynamic value) {
-    return '?${number(value).toStringAsFixed(2)}';
+    final number = value is num
+        ? value.toDouble()
+        : double.tryParse('${value ?? ''}') ?? 0;
+
+    return 'INR ${number.toStringAsFixed(2)}';
   }
 
   String percent(dynamic value) {
